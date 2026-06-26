@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fectoxi — Industrial IoT Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cyan: #00cfff;
+  --dark: #0a0a0a;
+  --darker: #050505;
+  --white: #ffffff;
+  --grey: #888888;
+  --border: #1a1a1a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark);
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--cyan);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid var(--cyan);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.15s ease;
+  opacity: 0.5;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,207,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,207,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5,5,5,0.9);
+  backdrop-filter: blur(20px);
+}
+
+.logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--white);
+}
+
+.logo span { color: var(--cyan); }
+
+.nav-links { display: flex; gap: 40px; list-style: none; }
+.nav-links a {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-decoration: none;
+  color: var(--grey);
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--cyan); }
+
+.nav-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.3s;
+}
+.nav-btn:hover { background: var(--cyan); color: var(--dark); }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 60px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-tag {
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(42px, 7vw, 100px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -2px;
+  margin-bottom: 30px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.4s forwards;
+}
+
+.hero-title .line2 { color: var(--cyan); display: block; }
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--grey);
+  max-width: 500px;
+  line-height: 1.6;
+  letter-spacing: 1px;
+  margin-bottom: 50px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.6s forwards;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 20px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.8s forwards;
+}
+
+.btn-primary {
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  padding: 16px 40px;
+  background: var(--cyan);
+  color: var(--dark);
+  border: none;
+  text-transform: uppercase;
+  cursor: none;
+  font-weight: 700;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover { background: var(--white); transform: translateY(-2px); }
+
+.btn-secondary {
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  padding: 16px 40px;
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* Hero stats */
+.hero-stats {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  opacity: 0;
+  animation: fadeLeft 0.8s 1s forwards;
+}
+
+.stat { text-align: right; }
+.stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--cyan);
+}
+.stat-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--grey);
+  text-transform: uppercase;
+}
+
+/* Scroll indicator */
+.scroll-ind {
+  position: absolute;
+  bottom: 40px;
+  left: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--grey);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 0.8s 1.2s forwards;
+}
+
+.scroll-line {
+  width: 40px;
+  height: 1px;
+  background: var(--cyan);
+  animation: pulse 2s infinite;
+}
+
+/* SECTIONS */
+section {
+  padding: 120px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.section-tag {
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+
+/* ABOUT */
+#about {
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.about-text p {
+  font-size: 17px;
+  color: var(--grey);
+  line-height: 1.8;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.about-card {
+  background: var(--darker);
+  border: 1px solid var(--border);
+  padding: 50px;
+  position: relative;
+}
+
+.about-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 40px; height: 2px;
+  background: var(--cyan);
+}
+
+.ceo-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.ceo-title {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.ceo-bio {
+  font-size: 16px;
+  color: var(--grey);
+  line-height: 1.7;
+}
+
+/* SERVICES */
+#services {
+  border-top: 1px solid var(--border);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 60px;
+}
+
+.service-card {
+  background: var(--darker);
+  padding: 50px 40px;
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: var(--cyan);
+  transition: width 0.4s;
+}
+
+.service-card:hover::after { width: 100%; }
+.service-card:hover { border-color: #222; }
+
+.service-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  margin-bottom: 30px;
+  opacity: 0.6;
+}
+
+.service-icon {
+  font-size: 36px;
+  margin-bottom: 24px;
+}
+
+.service-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.service-desc {
+  font-size: 15px;
+  color: var(--grey);
+  line-height: 1.7;
+}
+
+/* CONTACT */
+#contact {
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.contact-info { }
+
+.contact-item {
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+.contact-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.contact-value {
+  font-size: 18px;
+  color: var(--white);
+  letter-spacing: 1px;
+}
+
+.contact-form { }
+
+.form-group { margin-bottom: 24px; }
+
+.form-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--grey);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--darker);
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: 16px 20px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  outline: none;
+  transition: border-color 0.3s;
+  cursor: none;
+}
+
+.form-input:focus { border-color: var(--cyan); }
+
+textarea.form-input { height: 120px; resize: none; }
+
+.form-btn {
+  width: 100%;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  padding: 18px;
+  background: var(--cyan);
+  color: var(--dark);
+  border: none;
+  text-transform: uppercase;
+  cursor: none;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+.form-btn:hover { background: var(--white); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.footer-logo span { color: var(--cyan); }
+
+.footer-copy {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--grey);
+  text-transform: uppercase;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeLeft {
+  from { opacity: 0; transform: translate(30px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+
+/* Social links */
+.social-links { display: flex; gap: 16px; margin-top: 30px; }
+.social-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  color: var(--grey);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  font-family: 'Orbitron', monospace;
+}
+.social-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.social-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+/* Marquee ticker */
+.ticker {
+  background: var(--cyan);
+  padding: 12px 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+.ticker-inner {
+  display: flex;
+  gap: 60px;
+  animation: ticker 20s linear infinite;
+  white-space: nowrap;
+}
+.ticker-item {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--dark);
+  text-transform: uppercase;
+}
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Stats section */
+#stats {
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.stat-card {
+  padding: 60px 40px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+  transition: background 0.3s;
+}
+.stat-card:hover { background: var(--darker); }
+.stat-card:last-child { border-right: none; }
+.stat-big {
+  font-family: 'Orbitron', monospace;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--cyan);
+  margin-bottom: 12px;
+}
+.stat-desc {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--grey);
+  text-transform: uppercase;
+}
+
+/* Why Fectoxi section */
+#why {
+  border-top: 1px solid var(--border);
+}
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  margin-top: 60px;
+}
+.why-card {
+  background: var(--darker);
+  padding: 40px;
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  transition: all 0.3s;
+}
+.why-card:hover { border-color: #222; }
+.why-icon {
+  font-size: 28px;
+  min-width: 40px;
+}
+.why-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: var(--white);
+}
+.why-desc {
+  font-size: 14px;
+  color: var(--grey);
+  line-height: 1.6;
+}
+
+/* Floating WhatsApp */
+.whatsapp-float {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 56px; height: 56px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+  transition: transform 0.3s;
+  cursor: none;
+}
+.whatsapp-float:hover { transform: scale(1.1); }
+.whatsapp-float svg { width: 28px; height: 28px; fill: white; }
+
+/* LinkedIn section in contact */
+.linkedin-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: all 0.3s;
+  margin-top: 20px;
+  background: var(--darker);
+}
+.linkedin-card:hover { border-color: #0077b5; }
+.linkedin-logo {
+  width: 48px; height: 48px;
+  background: #0077b5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.linkedin-logo svg { width: 28px; height: 28px; fill: white; }
+.linkedin-info { flex: 1; }
+.linkedin-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.linkedin-sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--grey);
+  text-transform: uppercase;
+}
+.linkedin-arrow {
+  font-size: 20px;
+  color: #0077b5;
+}
+
+/* Scanline effect */
+.scanline {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(0,207,255,0.1);
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scanline"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">FEC<span>T</span>OXI</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get In Touch</button>
+</nav>
+
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item">⚡ Industrial IoT Solutions</span>
+    <span class="ticker-item">📍 Asset Tracking</span>
+    <span class="ticker-item">🏭 Smart Factories</span>
+    <span class="ticker-item">📊 Real Time Monitoring</span>
+    <span class="ticker-item">🇮🇳 Made In India</span>
+    <span class="ticker-item">⚡ Predictive Maintenance</span>
+    <span class="ticker-item">🔋 Zero Downtime</span>
+    <span class="ticker-item">📡 Connected Devices</span>
+    <span class="ticker-item">⚡ Industrial IoT Solutions</span>
+    <span class="ticker-item">📍 Asset Tracking</span>
+    <span class="ticker-item">🏭 Smart Factories</span>
+    <span class="ticker-item">📊 Real Time Monitoring</span>
+    <span class="ticker-item">🇮🇳 Made In India</span>
+    <span class="ticker-item">⚡ Predictive Maintenance</span>
+    <span class="ticker-item">🔋 Zero Downtime</span>
+    <span class="ticker-item">📡 Connected Devices</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-tag">// Industrial IoT Solutions — India</p>
+  <h1 class="hero-title">
+    Smart Factories<br>
+    <span class="line2">Start Here.</span>
+  </h1>
+  <p class="hero-sub">Fectoxi builds connected IoT solutions that help Indian manufacturers reduce downtime, track assets and run smarter operations.</p>
+  <div class="hero-btns">
+    <a href="#services" class="btn-primary">Our Solutions</a>
+    <a href="#contact" class="btn-secondary">Talk To Us</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">IoT</div>
+      <div class="stat-label">Technology</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Monitoring</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">🇮🇳</div>
+      <div class="stat-label">Made In India</div>
+    </div>
+  </div>
+
+  <div class="scroll-ind">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stat-card">
+    <div class="stat-big">₹100L Cr</div>
+    <div class="stat-desc">Indian Manufacturing Market</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-big">24/7</div>
+    <div class="stat-desc">Real Time Monitoring</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-big">IoT</div>
+    <div class="stat-desc">Connected Solutions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-big">🇮🇳</div>
+    <div class="stat-desc">Made In India</div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-text">
+    <p class="section-tag">// About Fectoxi</p>
+    <h2 class="section-title">Built For<br>Indian Industries.</h2>
+    <p>Fectoxi is an Industrial IoT startup founded with one mission — to bring world-class smart technology to Indian manufacturers at affordable prices.</p>
+    <p>We believe Indian factories deserve real-time data, smart monitoring and connected systems — not expensive imported solutions.</p>
+    <p>We are building from the ground up, for India, by India.</p>
+  </div>
+  <div class="about-card">
+    <div class="ceo-name">Shivansh Pratap Singh</div>
+    <div class="ceo-title">Founder & CEO</div>
+    <p class="ceo-bio">Young entrepreneur from Etawah, Uttar Pradesh — building Fectoxi to transform how Indian industries use technology. Registered startup on Startup India. On a mission to make Industrial IoT accessible to every Indian manufacturer.</p>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <p class="section-tag">// What We Build</p>
+  <h2 class="section-title">Our IoT Solutions.</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="service-icon">⚡</div>
+      <div class="service-title">Predictive Maintenance</div>
+      <p class="service-desc">Know when your machines will fail before they do. Our IoT sensors monitor machine health in real time and alert you before breakdowns happen.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="service-icon">📍</div>
+      <div class="service-title">Asset Tracking</div>
+      <p class="service-desc">Track every asset in your factory in real time. Know exactly where every machine, vehicle and equipment is at all times from your phone.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="service-icon">📊</div>
+      <div class="service-title">Real Time Monitoring</div>
+      <p class="service-desc">Get live data from your entire factory on one dashboard. Temperature, pressure, energy usage — everything visible from anywhere in the world.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- WHY FECTOXI -->
+<section id="why">
+  <p class="section-tag">// Why Choose Fectoxi</p>
+  <h2 class="section-title">Why Indian Industries<br>Trust Fectoxi.</h2>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon">🇮🇳</div>
+      <div>
+        <div class="why-title">100% Indian Brand</div>
+        <p class="why-desc">Built in India, for India. We understand Indian factory challenges better than any foreign company.</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">💰</div>
+      <div>
+        <div class="why-title">Affordable Pricing</div>
+        <p class="why-desc">World class IoT technology at a fraction of international prices. No compromise on quality.</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">⚡</div>
+      <div>
+        <div class="why-title">Easy Installation</div>
+        <p class="why-desc">Our devices install in minutes. No complex wiring, no expensive engineers, no renovation needed.</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">📞</div>
+      <div>
+        <div class="why-title">Local Support</div>
+        <p class="why-desc">Real support in Hindi and English. We are always available when you need us most.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-info">
+    <p class="section-tag">// Get In Touch</p>
+    <h2 class="section-title">Let's Build<br>Together.</h2>
+    <div class="contact-item">
+      <div class="contact-label">Email</div>
+      <div class="contact-value">fectoxi.official@gmail.com</div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-label">Location</div>
+      <div class="contact-value">Etawah, Uttar Pradesh, India</div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-label">LinkedIn</div>
+      <div class="contact-value">Shivansh Pratap Singh</div>
+    </div>
+    
+    <a href="https://www.linkedin.com/in/shivansh-pratap-singh-178269412" target="_blank" class="linkedin-card">
+      <div class="linkedin-logo">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </div>
+      <div class="linkedin-info">
+        <div class="linkedin-name">Shivansh Pratap Singh</div>
+        <div class="linkedin-sub">Founder & CEO — Fectoxi</div>
+      </div>
+      <div class="linkedin-arrow">→</div>
+    </a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/shivansh-pratap-singh-178269412" target="_blank" class="social-btn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a href="mailto:fectoxi.official@gmail.com" class="social-btn">
+        ✉ Email Us
+      </a>
+    </div>
+
+    <div class="contact-item" style="border:none">
+      <div class="contact-label">Registered On</div>
+      <div class="contact-value">Startup India — DPIIT</div>
+    </div>
+  </div>
+  <div class="contact-form">
+    <form action="https://formspree.io/f/mojbokpj" method="POST">
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <input type="text" name="name" class="form-input" placeholder="Enter your name" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Message</label>
+      <textarea name="message" class="form-input" placeholder="Tell us about your factory and what you need..." required></textarea>
+    </div>
+    <button type="submit" class="form-btn">Send Message →</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">FEC<span>T</span>OXI</div>
+  <div class="footer-copy">© 2025 Fectoxi — Industrial IoT Solutions — Made In India 🇮🇳</div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0;
+let ringX = 0, ringY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursor.style.left = mouseX - 6 + 'px';
+  cursor.style.top = mouseY - 6 + 'px';
+});
+
+function animateRing() {
+  ringX += (mouseX - ringX - 18) * 0.12;
+  ringY += (mouseY - ringY - 18) * 0.12;
+  ring.style.left = ringX + 'px';
+  ring.style.top = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Hover effects
+document.querySelectorAll('button, a, .service-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'scale(2)';
+    ring.style.transform = 'scale(1.5)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'scale(1)';
+    ring.style.transform = 'scale(1)';
+  });
+});
+</script>
+
+<!-- WhatsApp Float -->
+<a href="https://wa.me/+91?text=Hi Fectoxi! I am interested in your IoT solutions." target="_blank" class="whatsapp-float" title="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+</a>
+
+</body>
+</html>
